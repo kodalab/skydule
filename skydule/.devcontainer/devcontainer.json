@@ -1,0 +1,23 @@
+{
+  "name": "Gradule (Android / Kotlin)",
+  "image": "mcr.microsoft.com/devcontainers/java:1-17-bookworm",
+  "containerEnv": {
+    "ANDROID_HOME": "/home/vscode/android-sdk",
+    "ANDROID_SDK_ROOT": "/home/vscode/android-sdk"
+  },
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/home/vscode/android-sdk/platform-tools:/home/vscode/android-sdk/cmdline-tools/latest/bin"
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "hostRequirements": { "cpus": 4, "memory": "8gb" },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "fwcd.kotlin",
+        "vscjava.vscode-gradle",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ]
+    }
+  }
+}
