@@ -1,52 +1,62 @@
-# Gradule
+# Skydule
 
-A calendar app for Android that reads and writes your **Google and on-device calendars**, with a UI that shifts
-with the sky, in the spirit of [Gradient Weather](https://gradientweather.app/). The name is a play on
-gradient + schedule.
+A calendar for Android with a sky-coloured interface. It reads and writes the calendars already on your phone, including Google calendars synced to the device, and needs no account, no sign-in and no API keys. Free, with no ads.
 
-Kotlin · Jetpack Compose · Material 3 · no accounts, no API keys.
+Built with Kotlin, Jetpack Compose and Material 3.
 
-## Views
-- **Schedule** (default): a big hero for the selected day, then a continuous list of the days that have events.
-- **Week**: swipeable hour grid with overlapping events side by side and a "now" line.
-- **Month**: swipeable grid with event chips. Tap a day to jump to it in Schedule.
+## Features
 
-Tapping an event expands its card into a full-screen detail page (and shrinks back on close or back), the way
-Google Calendar does.
-
-Settings (theme: Sky, Material You, AMOLED black) are one tap away from every tab.
+- **Schedule**: a large header for the selected day, then a continuous list of the days that have events.
+- **Week**: a swipeable hour grid, with overlapping events side by side and a line showing the current time.
+- **Month**: a swipeable grid with an event chip for each event. Tapping a day opens it in Schedule.
+- **Event details and editing**: tap an event to see its details, then edit it in place. Create events with the + button. Reminders are supported.
+- **Themes**: Sky (changes with the time of day), Material You, and AMOLED black.
+- **App icon**: the default icon, or a dynamic one that shows today's date.
+- **Foldables and tablets**: on wide screens the event card slides in from the left or right, as you choose in Settings, and the list narrows to make room. Phones stay in portrait with the card opening full screen.
 
 ## How calendar access works
-Gradule uses Android's built-in Calendar Provider (`CalendarContract`). Any Google account on your phone syncs its
-calendars into that provider, so Gradule sees them automatically, and edits sync back through Android's own sync
-adapter. It can also create a calendar that exists only on your phone.
 
-## Get it running
+Skydule uses Android's built-in Calendar Provider (`CalendarContract`). Any account whose calendars are synced to the phone appears in the app automatically, and edits sync back through Android's own sync adapter. Skydule can also create a calendar that exists only on the device.
 
-### 1. Push to GitHub
+The app makes no network requests for your calendar data. There is no Google Calendar API, OAuth or backend. See the [privacy policy](https://kodalab.github.io/skydule/) for details.
+
+## Project layout
+
+| Path | Contents |
+| --- | --- |
+| `app/src/main/java/com/example/gradule/` | App source (the package name predates the Skydule name) |
+| `app/src/main/java/com/example/gradule/ui/` | Compose screens and components |
+| `app/src/main/java/com/example/gradule/data/` | Calendar access and settings storage |
+| `tools/` | Scripts that generate the launcher icons |
+| `docs/` | Privacy policy, Play Store listing, data safety answers, release guide |
+| `store/` | Play Store graphics |
+| `.github/workflows/` | CI: debug build on every push, signed release bundle on demand |
+
+`AGENTS.md` describes the architecture and the project rules for contributors and coding assistants. `CLAUDE.md` points Claude Code at it.
+
+## Building
+
+Requirements: JDK 17 and the Android SDK (compileSdk 36).
+
 ```bash
-git init && git add . && git commit -m "Gradule starter"
-git branch -M main
-git remote add origin https://github.com/<you>/gradule.git
-git push -u origin main
+./gradlew assembleDebug        # debug APK
+./gradlew testDebugUnitTest    # unit tests
+./gradlew bundleRelease        # release bundle (needs signing config, see below)
 ```
-The **Build APK** workflow runs automatically.
 
-### 2. Install on your phone
-After the workflow finishes, open the repo's **Releases** page on your phone, open **Latest debug build**, and
-download `app-debug.apk`. Allow "install unknown apps" for your browser when asked. Every push to `main`
-updates that release, and new builds install over the old one.
+The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`. Minimum Android version is 8.0 (API 26).
 
-### 3. Vibe code in Codespaces
-Create a Codespace from the repo. `.devcontainer/setup.sh` installs the Android SDK (takes a few minutes the first
-time). Then:
-```bash
-./gradlew assembleDebug      # check it compiles
-git commit -am "..." && git push   # CI builds your APK
-```
-Codespaces can't run an emulator, so the loop is: prompt, compile, push, install on your phone.
-`AGENTS.md` gives Copilot/Claude Code the project rules and roadmap.
+## Continuous integration
 
-## Before you ship
-- Change `applicationId`/`namespace` from `com.example.gradule`.
-- Replace the debug keystore for release builds.
+- **Build** runs on every push to `main`, compiles the app, and publishes the debug APK to the rolling `latest` GitHub release (it is also kept as a build artifact).
+- **Release** builds a signed Android App Bundle for Google Play. It runs when you start it by hand, or when you push a tag that starts with `v`. It needs four repository secrets: `UPLOAD_KEYSTORE_BASE64`, `UPLOAD_STORE_PASSWORD`, `UPLOAD_KEY_ALIAS` and `UPLOAD_KEY_PASSWORD`.
+
+The full release procedure is in [`docs/RELEASING.md`](docs/RELEASING.md).
+
+## Signing
+
+Release bundles are signed with an upload key. Keep the keystore and `keystore.properties` out of version control; both are ignored by git. For local release builds, create `keystore.properties` next to the project with the keystore path and credentials, as described in `docs/RELEASING.md`.
+
+## Contact
+
+getskydule@gmail.com
