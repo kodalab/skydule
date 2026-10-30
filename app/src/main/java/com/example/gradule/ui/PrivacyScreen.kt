@@ -39,7 +39,7 @@ private val policy: List<Pair<String, String>> = listOf(
         "Internet: for the weather and place suggestions above.",
     "Sharing and your choices" to "We never sell or share your data. You can turn off any permission at any time, " +
         "and uninstalling Skydule removes everything it stored. Your events stay in your calendar accounts.",
-    "Contact" to "skydule@gmail.com",
+    "Contact" to "getskydule@gmail.com",
 )
 
 @Composable

@@ -21,4 +21,4 @@ We never sell or share your data. You can turn off any permission at any time, a
 everything it stored. Your events stay in your calendar accounts.
 
 ## Contact
-skydule@gmail.com
+getskydule@gmail.com

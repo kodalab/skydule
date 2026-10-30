@@ -66,7 +66,7 @@ Named "Skydule" (sky + schedule). It was called Gradule and moved off that name 
   with **Get started**, which requests calendar access. If access was denied, it also offers the app settings.
 
 - Startup: `MainViewModel` knows calendar permission from the first instant, and `LaunchGate` subscribes to `eventsByDay`/`calendars` during the splash and holds it (up to 2.5 s extra) until `eventsLoaded`, so the first screen already has its events. The first load is not debounced; later change bursts are (250 ms). No separate cache: the Calendar Provider is already on-device, and a copy would only add staleness and a second place holding calendar data.
-- Privacy policy: in-app text in `ui/PrivacyScreen.kt` (opened from Settings > About) and `docs/PRIVACY.md`. Keep them in step. The same text is the public page `docs/index.html` (GitHub Pages, served from /docs). Contact: skydule@gmail.com.
+- Privacy policy: in-app text in `ui/PrivacyScreen.kt` (opened from Settings > About) and `docs/PRIVACY.md`. Keep them in step. The same text is the public page `docs/index.html` (GitHub Pages, served from /docs). Contact: getskydule@gmail.com.
 
 ## Design language (inspired by Gradient Weather)
 - UI "shifts with the sky": full-screen gradient driven by time of day (`ui/SkyBackground.kt`),
