@@ -80,12 +80,18 @@ fun EventDetailOverlay(
     // The page takes its tint from the event's calendar colour.
     val page = remember(event.color) { lerp(eventColor(event.color), Color(0xFF0B1026), 0.74f) }
 
+    val paneMode = LocalPaneMode.current
+    val inPane = paneMode != PaneMode.NONE
     TransformSheet(
         from = opened.from,
         progress = progress,
         startColor = Glass,
-        endColor = page,
+        // In the side panel the card's own frosted glass shows through, the same as when nothing is selected.
+        endColor = if (inPane) Color.Transparent else page,
         startCorner = 28.dp,
+        scrim = if (inPane) 0f else 0.32f,
+        endCorner = if (inPane) 28.dp else 0.dp,
+        startFull = paneMode == PaneMode.SLIDE,
     ) { modifier ->
         DetailPage(event, notes, modifier, onClose, onEdit = onEdit, onDelete = { confirmDelete = true })
     }
@@ -121,7 +127,7 @@ private fun DetailPage(
     onDelete: () -> Unit,
 ) {
     val accent = eventColor(event.color)
-    Column(modifier.statusBarsPadding().navigationBarsPadding()) {
+    Column(modifier.pageInsets()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,

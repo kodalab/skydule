@@ -209,13 +209,22 @@ fun ScheduleTab(
                 var settled by remember { mutableStateOf(false) }
                 LaunchedEffect(Unit) { delay(800); settled = true }
                 val nothingAtAll = settled && byDay.isEmpty()
-                Text(
-                    if (nothingAtAll) "No events yet.\nTap + to add your first one." else "That's everything for now",
-                    color = White.copy(alpha = if (nothingAtAll) 0.7f else 0.5f),
-                    fontSize = if (nothingAtAll) 16.sp else 13.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = if (nothingAtAll) 32.dp else 16.dp),
-                )
+                if (nothingAtAll) {
+                    Column(
+                        Modifier.fillMaxWidth().padding(vertical = 48.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text("Tap + to add an event", color = White.copy(alpha = 0.8f), fontSize = 22.sp, fontWeight = FontWeight.Light)
+                    }
+                } else {
+                    Text(
+                        "That's everything for now",
+                        color = White.copy(alpha = 0.5f),
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    )
+                }
             }
         }
     }
@@ -327,7 +336,8 @@ private fun DayRow(
             }
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (events.isEmpty()) {
+            // Today's empty state is already said by the header ("Nothing planned today").
+            if (events.isEmpty() && !isToday) {
                 Text(
                     "Nothing planned",
                     fontSize = 15.sp,

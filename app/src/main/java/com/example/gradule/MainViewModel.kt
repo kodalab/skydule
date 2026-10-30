@@ -8,6 +8,7 @@ import com.example.gradule.data.CalendarEvent
 import com.example.gradule.data.CalendarRepository
 import com.example.gradule.data.DateWindow
 import com.example.gradule.data.DefaultReminder
+import com.example.gradule.data.DetailSide
 import com.example.gradule.data.DeviceCalendar
 import com.example.gradule.data.LocationProvider
 import com.example.gradule.data.NewEvent
@@ -88,6 +89,18 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
     val snoozeLength: StateFlow<SnoozeLength> = settings.snoozeLength
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SnoozeLength.TEN)
+
+    val detailSide: StateFlow<DetailSide> = settings.detailSide
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DetailSide.RIGHT)
+
+    /**
+     * True on foldables (a hinge sensor) and tablets (600dp+ shortest side): the devices that can show two panes,
+     * so only they are offered the side setting. Decided by the hardware, so it also shows on a fold's cover screen.
+     */
+    val supportsTwoPanes: Boolean = app.packageManager.hasSystemFeature("android.hardware.sensor.hinge_angle") ||
+        app.resources.configuration.smallestScreenWidthDp >= 600
+
+    fun setDetailSide(side: DetailSide) { viewModelScope.launch { settings.setDetailSide(side) } }
 
     private val _iconChoice = MutableStateFlow(com.example.gradule.icons.DayIcon.choice(app))
     val iconChoice: StateFlow<com.example.gradule.icons.IconChoice> = _iconChoice.asStateFlow()

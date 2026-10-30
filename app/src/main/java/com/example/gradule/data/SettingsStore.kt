@@ -39,6 +39,12 @@ enum class DefaultReminder(val label: String, val minutes: Int?) {
 }
 
 /** How long a reminder is put off when you tap Snooze on its notification. */
+/** Which side the event panel sits on when the screen is wide enough for two panes. */
+enum class DetailSide(val label: String) {
+    RIGHT("On the right"),
+    LEFT("On the left"),
+}
+
 enum class SnoozeLength(val label: String, val minutes: Int) {
     FIVE("5 minutes", 5),
     TEN("10 minutes", 10),
@@ -54,6 +60,7 @@ class SettingsStore(private val context: Context) {
     private val weekStartKey = stringPreferencesKey("week_start")
     private val reminderKey = stringPreferencesKey("default_reminder")
     private val showWeatherKey = booleanPreferencesKey("show_weather")
+    private val detailSideKey = stringPreferencesKey("detail_side")
     private val snoozeKey = stringPreferencesKey("snooze_length")
 
     private inline fun <reified T : Enum<T>> Flow<androidx.datastore.preferences.core.Preferences>.enumFlow(
@@ -67,6 +74,8 @@ class SettingsStore(private val context: Context) {
     val defaultReminder: Flow<DefaultReminder> = context.dataStore.data.enumFlow(reminderKey, DefaultReminder.NONE)
     val showWeather: Flow<Boolean> = context.dataStore.data.map { it[showWeatherKey] ?: true }
     /** 0 = plain sliding pill, 1 = full stretch. */
+    val detailSide: Flow<DetailSide> = context.dataStore.data.enumFlow(detailSideKey, DetailSide.RIGHT)
+    /** Debug builds only: lets a phone in landscape show the two-pane layout for testing. */
     val snoozeLength: Flow<SnoozeLength> = context.dataStore.data.enumFlow(snoozeKey, SnoozeLength.TEN)
 
     suspend fun setThemeMode(mode: ThemeMode) = context.dataStore.edit { it[themeKey] = mode.name }
@@ -74,5 +83,6 @@ class SettingsStore(private val context: Context) {
     suspend fun setWeekStart(start: WeekStart) = context.dataStore.edit { it[weekStartKey] = start.name }
     suspend fun setDefaultReminder(r: DefaultReminder) = context.dataStore.edit { it[reminderKey] = r.name }
     suspend fun setShowWeather(show: Boolean) = context.dataStore.edit { it[showWeatherKey] = show }
+    suspend fun setDetailSide(side: DetailSide) = context.dataStore.edit { it[detailSideKey] = side.name }
     suspend fun setSnoozeLength(length: SnoozeLength) = context.dataStore.edit { it[snoozeKey] = length.name }
 }

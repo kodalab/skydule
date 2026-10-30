@@ -8,6 +8,8 @@ import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -71,6 +73,9 @@ fun SettingsScreen(
     onTemperature: (TemperatureUnit) -> Unit,
     hasLocalCalendar: Boolean,
     onCreateLocal: () -> Unit,
+    showSideOption: Boolean,
+    detailSide: com.example.gradule.data.DetailSide,
+    onDetailSide: (com.example.gradule.data.DetailSide) -> Unit,
     iconChoice: com.example.gradule.icons.IconChoice,
     onOpenIconPicker: () -> Unit,
     onOpenPrivacy: () -> Unit,
@@ -81,10 +86,12 @@ fun SettingsScreen(
         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty()
     }
 
+    // On wide screens the page stays a readable column in the middle instead of stretching edge to edge.
+    Box(modifier.fillMaxSize().background(SettingsBackground), contentAlignment = Alignment.TopCenter) {
     Column(
-        modifier
+        Modifier
+            .widthIn(max = 640.dp)
             .fillMaxSize()
-            .background(SettingsBackground)
             .statusBarsPadding()
             .navigationBarsPadding(),
     ) {
@@ -119,6 +126,17 @@ fun SettingsScreen(
                     onClick = onOpenIconPicker,
                     trailingArrow = true,
                 )
+                // Only on foldables and tablets: the devices that can show the event panel beside the list.
+                if (showSideOption) {
+                    PickRow(
+                        "Event details",
+                        detailSide,
+                        com.example.gradule.data.DetailSide.entries,
+                        { it.label },
+                        onDetailSide,
+                        subtitle = "Which side they open on when the screen is wide",
+                    )
+                }
             }
             Section("Schedule") {
                 ToggleRow(
@@ -176,6 +194,7 @@ fun SettingsScreen(
             }
             Spacer(Modifier.size(24.dp))
         }
+    }
     }
 }
 

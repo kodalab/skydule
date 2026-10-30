@@ -111,12 +111,17 @@ fun EventEditorOverlay(
     onClose: () -> Unit,
     onSave: (NewEvent) -> Unit,
 ) {
+    val paneMode = LocalPaneMode.current
+    val inPane = paneMode != PaneMode.NONE
     TransformSheet(
         from = request.from,
         progress = progress,
         startColor = White,
-        endColor = EditorBackground,
+        endColor = if (inPane) Color.Transparent else EditorBackground,
         startCorner = 16.dp,
+        scrim = if (inPane) 0f else 0.32f,
+        endCorner = if (inPane) 28.dp else 0.dp,
+        startFull = paneMode == PaneMode.SLIDE,
     ) { modifier ->
         EditorPage(modifier, request, calendars, onCreateLocal, defaultReminder, onClose, onSave)
     }
@@ -225,7 +230,7 @@ private fun EditorPage(
         ).show()
     }
 
-    Column(modifier.statusBarsPadding().navigationBarsPadding().imePadding()) {
+    Column(modifier.pageInsets().imePadding()) {
         // Top bar: close + Save
         Row(
             Modifier.fillMaxWidth().padding(start = 4.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),

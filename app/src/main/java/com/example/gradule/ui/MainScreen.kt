@@ -42,6 +42,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.geometry.Rect
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -66,6 +67,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.example.gradule.data.DetailSide
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -116,7 +121,18 @@ fun MainScreen(vm: MainViewModel) {
     val showWeather by vm.showWeather.collectAsStateWithLifecycle()
     val firstDow by vm.firstDayOfWeek.collectAsStateWithLifecycle()
     val weather by vm.weather.collectAsStateWithLifecycle()
+    val detailSide by vm.detailSide.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    // Two panes (list + event panel) when there is room: 600dp+ wide and 480dp+ tall.  Folding or unfolding changes this live (the activity isn't recreated).
+    val wide = configuration.screenWidthDp >= 600 &&
+        configuration.screenHeightDp >= 480
+    val paneWidth = (configuration.screenWidthDp * 0.45f).coerceIn(300f, 520f).dp
+    // Every tab stays full width until an event opens; then the card slides in and the content narrows to its edge.
+    val paneMode = when {
+        !wide -> PaneMode.NONE
+        else -> PaneMode.SLIDE
+    }
+    var paneBounds by remember { mutableStateOf(Rect.Zero) }
 
     val locationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
         vm.refreshWeather(ok, force = true)
@@ -164,14 +180,21 @@ fun MainScreen(vm: MainViewModel) {
         editing = EditorRequest(from, day, startMinutes)
         scope.launch {
             editorProgress.snapTo(0f)
-            editorProgress.animateTo(1f, tween(OPEN_MS, easing = OpenEasing))
+            if (paneMode == PaneMode.SLIDE) editorProgress.snapTo(1f) else editorProgress.animateTo(1f, tween(OPEN_MS, easing = OpenEasing))
         }
     }
 
+    // True while the side card slides away, so it keeps showing its page until it has left.
+    var paneClosing by remember { mutableStateOf(false) }
+
     fun closeEditor() {
         scope.launch {
-            editorProgress.animateTo(0f, tween(CLOSE_MS, easing = CloseEasing))
-            editing = null
+            if (paneMode == PaneMode.SLIDE) {
+                paneClosing = true
+            } else {
+                editorProgress.animateTo(0f, tween(CLOSE_MS, easing = CloseEasing))
+                editing = null
+            }
         }
     }
     // Detail page: grows out of the tapped card (progress 0 -> 1) and shrinks back into it on close.
@@ -179,18 +202,27 @@ fun MainScreen(vm: MainViewModel) {
     val detailProgress = remember { Animatable(0f) }
 
     fun openEvent(event: CalendarEvent, from: Rect) {
-        if (opened != null) return
+        if (editing != null) return
+        if (opened != null) {
+            // Wide screens: tapping another event swaps the panel's content in place.
+            if (wide) opened = OpenedEvent(event, from)
+            return
+        }
         opened = OpenedEvent(event, from)
         scope.launch {
             detailProgress.snapTo(0f)
-            detailProgress.animateTo(1f, tween(OPEN_MS, easing = OpenEasing))
+            if (paneMode == PaneMode.SLIDE) detailProgress.snapTo(1f) else detailProgress.animateTo(1f, tween(OPEN_MS, easing = OpenEasing))
         }
     }
 
     fun closeEvent() {
         scope.launch {
-            detailProgress.animateTo(0f, tween(CLOSE_MS, easing = CloseEasing))
-            opened = null
+            if (paneMode == PaneMode.SLIDE) {
+                paneClosing = true
+            } else {
+                detailProgress.animateTo(0f, tween(CLOSE_MS, easing = CloseEasing))
+                opened = null
+            }
         }
     }
 
@@ -200,13 +232,106 @@ fun MainScreen(vm: MainViewModel) {
         tabIndex = GraduleTab.Schedule.ordinal
     }
 
+    // The editor and the detail page live in one place on a phone (full screen) and another on a wide screen
+    // (inside the side panel). movableContentOf keeps their state (a half-written event) when the screen folds
+    // or unfolds and they move between the two.
+    val overlays = remember {
+        movableContentOf { origin: Offset, inPane: Boolean ->
+            val cfg = LocalConfiguration.current
+            val dens = LocalDensity.current
+            editing?.let { request ->
+                EventEditorOverlay(
+                    request = request.copy(from = request.from.translate(-origin)),
+                    progress = editorProgress.asState(),
+                    calendars = calendars,
+                    onCreateLocal = vm::createLocalCalendar,
+                    defaultReminder = defaultReminder.minutes,
+                    onClose = { closeEditor() },
+                    onSave = { event ->
+                        vm.saveEvent(event)
+                        closeEditor()
+                    },
+                )
+            }
+            opened?.let { current ->
+                EventDetailOverlay(
+                    opened = current.copy(from = current.from.translate(-origin)),
+                    loadNotes = vm::descriptionFor,
+                    progress = detailProgress.asState(),
+                    onClose = { closeEvent() },
+                    onDelete = {
+                        vm.deleteEvent(current.event.id)
+                        closeEvent()
+                    },
+                    onEdit = {
+                        // The detail page turns into the editor in place: same area, no card to return to.
+                        val event = current.event
+                        scope.launch {
+                            val draft = vm.draftFor(event.id) ?: return@launch
+                            val d = dens.density
+                            val full = if (inPane) paneBounds else Rect(0f, 0f, cfg.screenWidthDp * d, cfg.screenHeightDp * d)
+                            if (inPane) {
+                                editing = EditorRequest(full, draft.startDay, null, draft)
+                                editorProgress.snapTo(1f)
+                                opened = null
+                                detailProgress.snapTo(0f)
+                            } else {
+                                opened = null
+                                detailProgress.snapTo(0f)
+                                editing = EditorRequest(full, draft.startDay, null, draft)
+                                editorProgress.snapTo(1f)
+                            }
+                        }
+                    },
+                )
+            }
+        }
+    }
+
     var barPx by remember { mutableIntStateOf(0) }
     val barDp = with(density) { barPx.toDp() }
+    val paneOpen = (opened != null || editing != null) && !paneClosing
+    val fromRight = detailSide == DetailSide.RIGHT
+    // Schedule: the card is always there. Week and Month: it slides in from the chosen side and the content
+    // makes room for it, then slides out again when closed.
+    val paneSlot: @Composable () -> Unit = {
+        when (paneMode) {
+            PaneMode.SLIDE -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = if (fromRight) Alignment.CenterEnd else Alignment.CenterStart,
+            ) { androidx.compose.animation.AnimatedVisibility(
+                visible = paneOpen,
+                enter = androidx.compose.animation.slideInHorizontally(tween(OPEN_MS, easing = OpenEasing)) { if (fromRight) it else -it },
+                exit = androidx.compose.animation.slideOutHorizontally(tween(CLOSE_MS, easing = CloseEasing)) { if (fromRight) it else -it },
+            ) {
+                // The card keeps its page until the slide-out has finished, then the page is let go.
+                androidx.compose.runtime.DisposableEffect(Unit) {
+                    onDispose {
+                        if (paneClosing) {
+                            editing = null
+                            opened = null
+                            paneClosing = false
+                            scope.launch { editorProgress.snapTo(0f); detailProgress.snapTo(0f) }
+                        }
+                    }
+                }
+                DetailPane(paneWidth, true, paneMode, { paneBounds = it }) {
+                    overlays(paneBounds.topLeft, true)
+                }
+            } }
+            PaneMode.NONE -> Unit
+        }
+    }
+    // The content makes room for the card by padding, so the sky, the blur and the tab bar's fade
+    // stay one continuous layer right across the screen, behind the card as well.
+    val roomSpec = tween<androidx.compose.ui.unit.Dp>(if (paneOpen) OPEN_MS else CLOSE_MS, easing = if (paneOpen) OpenEasing else CloseEasing)
+    val startPad by androidx.compose.animation.core.animateDpAsState(if (paneOpen && !fromRight) paneWidth + 24.dp else 0.dp, roomSpec, label = "startPad")
+    val endPad by androidx.compose.animation.core.animateDpAsState(if (paneOpen && fromRight) paneWidth + 24.dp else 0.dp, roomSpec, label = "endPad")
     CompositionLocalProvider(LocalBarInset provides barDp) {
         Box(Modifier.fillMaxSize()) {
             // Schedule scrolls underneath the floating bar (blurred there); Week and Month stay clear of it.
-            BottomBlur(barPx = if (tab == GraduleTab.Schedule) barPx else 0, modifier = Modifier.fillMaxSize()) {
-                Box(Modifier.fillMaxSize().statusBarsPadding()) {
+            BottomBlur(barPx = barPx, meltContent = tab == GraduleTab.Schedule, modifier = Modifier.fillMaxSize()) {
+                Box(Modifier.fillMaxSize().statusBarsPadding().padding(start = startPad, end = endPad)) {
                     when (tab) {
                         GraduleTab.Schedule -> ScheduleTab(
                             selected = date,
@@ -248,7 +373,7 @@ fun MainScreen(vm: MainViewModel) {
                     }
                 }
             }
-            Box(Modifier.align(Alignment.BottomCenter).onSizeChanged { barPx = it.height }) {
+            Box(Modifier.align(Alignment.BottomCenter).padding(start = startPad, end = endPad).onSizeChanged { barPx = it.height }) {
                 GlassTabBar(
                     selected = tab,
                     onSelect = { tabIndex = it.ordinal },
@@ -264,53 +389,14 @@ fun MainScreen(vm: MainViewModel) {
                 contentColor = Ink,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp, bottom = barDp + 16.dp)
+                    .padding(end = 16.dp + endPad, bottom = barDp + 16.dp)
                     .onGloballyPositioned { fabBounds = it.boundsInRoot() },
             ) { Icon(Icons.Default.Add, contentDescription = "New event") }
+            paneSlot()
         }
     }
-
-    editing?.let { request ->
-        EventEditorOverlay(
-            request = request,
-            progress = editorProgress.asState(),
-            calendars = calendars,
-            onCreateLocal = vm::createLocalCalendar,
-            defaultReminder = defaultReminder.minutes,
-            onClose = { closeEditor() },
-            onSave = { event ->
-                vm.saveEvent(event)
-                closeEditor()
-            },
-        )
-    }
+    if (paneMode == PaneMode.NONE) overlays(Offset.Zero, false)
     BackHandler(enabled = editing != null && opened == null) { closeEditor() }
-
-    opened?.let { current ->
-        EventDetailOverlay(
-            opened = current,
-            loadNotes = vm::descriptionFor,
-            progress = detailProgress.asState(),
-            onClose = { closeEvent() },
-            onDelete = {
-                vm.deleteEvent(current.event.id)
-                closeEvent()
-            },
-            onEdit = {
-                // The detail page turns into the editor in place: same full-screen area, no card to return to.
-                val event = current.event
-                scope.launch {
-                    val draft = vm.draftFor(event.id) ?: return@launch
-                    val d = density.density
-                    val full = Rect(0f, 0f, configuration.screenWidthDp * d, configuration.screenHeightDp * d)
-                    opened = null
-                    detailProgress.snapTo(0f)
-                    editing = EditorRequest(full, draft.startDay, null, draft)
-                    editorProgress.snapTo(1f)
-                }
-            },
-        )
-    }
     BackHandler(enabled = opened != null) { closeEvent() }
 
     // A tapped reminder notification opens its event. It may take a moment for the events to load.
@@ -330,7 +416,7 @@ fun MainScreen(vm: MainViewModel) {
     if (showSettings) {
         // Grows out of the gear and shrinks back into it, with the same motion as the event pages.
         TransformSheet(
-            from = gearRect(),
+            from = gearRect(if (paneMode == PaneMode.SLIDE && paneOpen && fromRight) paneWidth + 24.dp else 0.dp),
             progress = settingsProgress.asState(),
             startColor = Glass,
             endColor = SettingsBackground,
@@ -352,6 +438,9 @@ fun MainScreen(vm: MainViewModel) {
             hasLocalCalendar = calendars.any { it.isLocal },
             onCreateLocal = vm::createLocalCalendar,
             iconChoice = iconChoice,
+            showSideOption = vm.supportsTwoPanes,
+            detailSide = detailSide,
+            onDetailSide = vm::setDetailSide,
             onOpenIconPicker = { showIconPicker = true },
             onOpenPrivacy = { showPrivacy = true },
             onClose = { closeSettings() },
@@ -377,12 +466,62 @@ fun MainScreen(vm: MainViewModel) {
 
 /** Approximate on-screen spot of the gear button in the top-right of every tab's header. */
 @Composable
-private fun gearRect(): Rect {
+private fun gearRect(rightInset: androidx.compose.ui.unit.Dp): Rect {
     val density = LocalDensity.current
     val config = LocalConfiguration.current
     val top = WindowInsets.statusBars.getTop(density).toFloat()
     val screenW = config.screenWidthDp * density.density
     val size = 48f * density.density
-    val right = screenW - 12f * density.density
+    val right = screenW - rightInset.value * density.density - 12f * density.density
     return Rect(right - size, top, right, top + size)
+}
+
+
+/**
+ * The side panel on wide screens: a floating frosted card (the same glass as the list cards) that holds the event
+ * page or editor, or a hint when nothing is open. Its bounds are reported so pages can grow out of the tapped card.
+ */
+@Composable
+private fun DetailPane(
+    width: androidx.compose.ui.unit.Dp,
+    hasContent: Boolean,
+    mode: PaneMode,
+    onBounds: (Rect) -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp)
+    // Margin on every side; the outer side keeps clear of the screen edge and the inner side from the list.
+    Box(
+        Modifier
+            .fillMaxHeight()
+            .width(width + 24.dp)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(12.dp),
+    ) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .onGloballyPositioned { onBounds(it.boundsInRoot()) }
+                .background(Glass, shape)
+                .border(1.dp, White.copy(alpha = 0.14f), shape),
+        ) {
+            if (!hasContent) {
+                Column(
+                    Modifier.fillMaxSize().padding(32.dp),
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text("Select an event", fontSize = 22.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Light, color = White.copy(alpha = 0.8f))
+                    Text(
+                        "Its details open here, beside your list.",
+                        fontSize = 14.sp,
+                        color = White.copy(alpha = 0.55f),
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
+                }
+            }
+            CompositionLocalProvider(LocalPaneMode provides mode) { content() }
+        }
+    }
 }

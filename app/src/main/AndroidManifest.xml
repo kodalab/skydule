@@ -32,7 +32,11 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density"
+            android:resizeableActivity="true"
             android:windowSoftInputMode="adjustResize">
+            <!-- Folding, unfolding and rotating resize the window without recreating the activity, so an open event
+                 or half-written editor survives. The UI reads the new size from LocalConfiguration. -->
             <!-- No launcher filter here: the day-icon aliases below are what appears in the launcher. -->
         </activity>
 

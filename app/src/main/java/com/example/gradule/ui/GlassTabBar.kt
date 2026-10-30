@@ -55,6 +55,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -121,6 +122,8 @@ internal fun GlassTabBar(selected: GraduleTab, onSelect: (GraduleTab) -> Unit) {
         Modifier
             .navigationBarsPadding()
             .padding(horizontal = 24.dp, vertical = 12.dp)
+            // On wide screens the bar stays a compact pill instead of stretching across the page.
+            .widthIn(max = 560.dp)
             .fillMaxWidth()
             .clip(shape)
             .background(Color.Black.copy(alpha = 0.30f))

@@ -28,10 +28,11 @@ internal val LocalBarInset = compositionLocalOf { 0.dp }
 /**
  * Lets [content] scroll underneath the floating tab bar: along the bottom (the bar's height plus a little above it)
  * the content melts into a blurred, slightly darkened copy of itself. The blur needs Android 12 (API 31); older
- * phones get the darkened fade without the blur.
+ * phones get the darkened fade without the blur. With [meltContent] false (Week, Month) the content is left sharp and only
+ * the darkening is drawn, so every tab shares the same background.
  */
 @Composable
-internal fun BottomBlur(barPx: Int, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+internal fun BottomBlur(barPx: Int, modifier: Modifier = Modifier, meltContent: Boolean = true, content: @Composable () -> Unit) {
     val layer = rememberGraphicsLayer()
     val blurLayer = rememberGraphicsLayer()
     val blurOk = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
@@ -54,7 +55,7 @@ internal fun BottomBlur(barPx: Int, modifier: Modifier = Modifier, content: @Com
                         endY = size.height,
                     )
                     // Replace the sharp content in the band by fading it out...
-                    drawRect(
+                    if (meltContent) drawRect(
                         brush = ramp,
                         topLeft = Offset(0f, top),
                         size = Size(w, band),
@@ -62,7 +63,7 @@ internal fun BottomBlur(barPx: Int, modifier: Modifier = Modifier, content: @Com
                         blendMode = BlendMode.DstOut,
                     )
                     // ...and fading a blurred copy in.
-                    if (blurOk) {
+                    if (blurOk && meltContent) {
                         blurLayer.compositingStrategy = LayerCompositing.Offscreen
                         blurLayer.renderEffect = BlurEffect(10.dp.toPx(), 10.dp.toPx(), TileMode.Clamp)
                         blurLayer.record(size = IntSize(w.toInt(), band.toInt())) {

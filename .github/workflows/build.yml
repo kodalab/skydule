@@ -23,12 +23,14 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          ./gradlew assembleDebug --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk skydule-debug.apk
 
       - uses: actions/upload-artifact@v4
         with:
           name: skydule-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: skydule-debug.apk
 
       # On main, also publish the APK to a rolling "latest" release so you can
       # install it straight from your phone's browser.
@@ -46,4 +48,4 @@ jobs:
           name: Latest debug build
           prerelease: true
           body: Automatic debug build of the latest commit on main.
-          files: app/build/outputs/apk/debug/app-debug.apk
+          files: skydule-debug.apk

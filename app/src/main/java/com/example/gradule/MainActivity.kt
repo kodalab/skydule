@@ -44,6 +44,13 @@ import com.example.gradule.ui.SkyBackground
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Ordinary phones stay in portrait: landscape is too short for the side card and looks cramped. Foldables and
+        // tablets rotate freely.
+        val roomy = packageManager.hasSystemFeature("android.hardware.sensor.hinge_angle") ||
+            resources.configuration.smallestScreenWidthDp >= 600
+        if (!roomy) {
+            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
         // Keep the launcher icon's date and sky band current, and plan the next change.
         DayIcon.apply(this)
         DayIcon.scheduleNext(this)

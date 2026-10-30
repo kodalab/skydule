@@ -1,5 +1,7 @@
 package com.example.gradule.ui
 
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -48,6 +50,12 @@ fun TransformSheet(
     startColor: Color,
     endColor: Color,
     startCorner: Dp,
+    /** Strength of the dimming behind the sheet. Zero when the sheet fills a card rather than the screen. */
+    scrim: Float = 0.32f,
+    /** Corner radius once fully open: square for a full-screen page, rounded when it fills a card. */
+    endCorner: Dp = 0.dp,
+    /** The sheet is already at its full size from the start (a card that slides in on its own). */
+    startFull: Boolean = false,
     content: @Composable (Modifier) -> Unit,
 ) {
     val density = LocalDensity.current
@@ -61,15 +69,16 @@ fun TransformSheet(
         val screenW = constraints.maxWidth.toFloat()
         val screenH = constraints.maxHeight.toFloat()
 
-        val left = mix(from.left, 0f, p)
-        val top = mix(from.top, 0f, p)
-        val right = mix(from.right, screenW, p)
-        val bottom = mix(from.bottom, screenH, p)
+        val origin = if (startFull) Rect(0f, 0f, screenW, screenH) else from
+        val left = mix(origin.left, 0f, p)
+        val top = mix(origin.top, 0f, p)
+        val right = mix(origin.right, screenW, p)
+        val bottom = mix(origin.bottom, screenH, p)
 
         // Start colour becomes solid over the first half so whatever was under the sheet is covered as it grows.
         val fill = (p / 0.55f).coerceIn(0f, 1f)
 
-        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.32f * p)))
+        if (scrim > 0f) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = scrim * p)))
 
         Box(
             Modifier
@@ -78,7 +87,7 @@ fun TransformSheet(
                     width = with(density) { (right - left).toDp() },
                     height = with(density) { (bottom - top).toDp() },
                 )
-                .clip(RoundedCornerShape(lerp(startCorner, 0.dp, p)))
+                .clip(RoundedCornerShape(lerp(startCorner, endCorner, p)))
                 .background(lerp(startColor, endColor, fill)),
         ) {
             if (p > 0.4f) {
@@ -97,3 +106,17 @@ fun TransformSheet(
         }
     }
 }
+
+
+/**
+ * Where the event page/editor is shown. NONE: full screen (phones, cover screens). SLIDE: a card that slides in from the side while the content makes room (Week, Month).
+ */
+enum class PaneMode { NONE, SLIDE }
+
+val LocalPaneMode = androidx.compose.runtime.compositionLocalOf { PaneMode.NONE }
+
+/** Keeps a full-screen page clear of the status and navigation bars, except inside the side panel. */
+@Composable
+fun Modifier.pageInsets(): Modifier =
+    if (LocalPaneMode.current != PaneMode.NONE) this
+    else this.statusBarsPadding().navigationBarsPadding()

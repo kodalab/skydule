@@ -1,7 +1,8 @@
-# Skydule
+# Gradule
 
 A calendar app for Android that reads and writes your **Google and on-device calendars**, with a UI that shifts
-wihout the day reflecting the time of day.
+with the sky, in the spirit of [Gradient Weather](https://gradientweather.app/). The name is a play on
+gradient + schedule.
 
 Kotlin · Jetpack Compose · Material 3 · no accounts, no API keys.
 
@@ -16,17 +17,17 @@ Google Calendar does.
 Settings (theme: Sky, Material You, AMOLED black) are one tap away from every tab.
 
 ## How calendar access works
-Skydule uses Android's built-in Calendar Provider (`CalendarContract`). Any Google account on your phone syncs its
-calendars into that provider, so Skydule sees them automatically, and edits sync back through Android's own sync
+Gradule uses Android's built-in Calendar Provider (`CalendarContract`). Any Google account on your phone syncs its
+calendars into that provider, so Gradule sees them automatically, and edits sync back through Android's own sync
 adapter. It can also create a calendar that exists only on your phone.
 
 ## Get it running
 
 ### 1. Push to GitHub
 ```bash
-git init && git add . && git commit -m "Skydule starter"
+git init && git add . && git commit -m "Gradule starter"
 git branch -M main
-git remote add origin https://github.com/<you>/Skydule.git
+git remote add origin https://github.com/<you>/gradule.git
 git push -u origin main
 ```
 The **Build APK** workflow runs automatically.
@@ -47,5 +48,5 @@ Codespaces can't run an emulator, so the loop is: prompt, compile, push, install
 `AGENTS.md` gives Copilot/Claude Code the project rules and roadmap.
 
 ## Before you ship
-- Change `applicationId`/`namespace` from `com.example.Skydule`.
+- Change `applicationId`/`namespace` from `com.example.gradule`.
 - Replace the debug keystore for release builds.
