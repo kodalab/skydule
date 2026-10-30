@@ -1,8 +1,7 @@
 # Skydule
 
 A calendar app for Android that reads and writes your **Google and on-device calendars**, with a UI that shifts
-with the sky, in the spirit of [Gradient Weather](https://gradientweather.app/). The name is a play on
-gradient + schedule.
+wihout the day reflecting the time of day.
 
 Kotlin · Jetpack Compose · Material 3 · no accounts, no API keys.
 
