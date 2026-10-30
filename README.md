@@ -8,7 +8,7 @@ Built with Kotlin, Jetpack Compose and Material 3.
 
 - **Schedule**: a large header for the selected day, then a continuous list of the days that have events.
 - **Week**: a swipeable hour grid, with overlapping events side by side and a line showing the current time.
-- **Month**: a swipeable grid with an event chip for each event. Tapping a day opens it in Schedule.
+- **Month**: a swipeable full-month grid with titled event chips. Tapping a day slides up a panel listing that day's events, with a + button to add one. Tap the day again to close it.
 - **Event details and editing**: tap an event to see its details, then edit it in place. Create events with the + button. Reminders are supported.
 - **Themes**: Sky (changes with the time of day), Material You, and AMOLED black.
 - **App icon**: the default icon, or a dynamic one that shows today's date.

@@ -65,10 +65,15 @@ object DayIcon {
     fun choice(context: Context): IconChoice =
         runCatching { IconChoice.valueOf(prefs(context).getString(KEY_CHOICE, null) ?: "") }.getOrDefault(IconChoice.DEFAULT)
 
-    /** Saves the choice and switches the icon now. */
+    /** True while the app is on screen. Switching the launcher alias then would close it, so switches wait. */
+    @Volatile var appVisible = false
+
+    /**
+     * Saves the choice. The launcher icon itself changes the next time the app goes out of sight (MainActivity.onStop),
+     * because switching the alias the app was launched from closes the running app.
+     */
     fun setChoice(context: Context, choice: IconChoice) {
         prefs(context).edit().putString(KEY_CHOICE, choice.name).apply()
-        apply(context)
         scheduleNext(context)
     }
 
@@ -135,7 +140,8 @@ object DayIcon {
 /** Runs at each period change and midnight, after boot, after a time-zone or clock change, and after an app update. */
 class DayIconReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        DayIcon.apply(context)
+        // If the app is open, leave it alone: it applies the change itself when it goes out of sight.
+        if (!DayIcon.appVisible) DayIcon.apply(context)
         DayIcon.scheduleNext(context)
     }
 }

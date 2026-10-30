@@ -13,12 +13,13 @@ android {
 
     defaultConfig {
         // Store listing ID. Must be unique on Google Play and can't change after the first upload.
-        applicationId = "com.gregjameshoward.skydule"
+        applicationId = "com.kodalabs.skydule"
         minSdk = 26
         targetSdk = 36
-        // CI passes -PversionCode=<run number> so every uploaded bundle is higher than the last (Play requires it).
-        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 1
-        versionName = "0.2.0"
+        // CI passes -PversionCode=<run number + 100> so every uploaded bundle is higher than the last (Play requires it).
+        // The fallback is the code of the last bundle uploaded to Play by hand (see CHANGELOG.md); raise it with each upload.
+        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 21
+        versionName = "1.0.0"
     }
 
     // A fixed debug keystore is committed so every CI build has the same signature
@@ -61,6 +62,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // The only native code is AndroidX's (graphics-path, datastore). Putting its symbol table in the bundle
+            // lets Play Console read native crash stacks, and clears its "no debug symbols" warning.
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
             // Without keystore.properties the release build is signed with the debug key so it still builds
             // locally, but such a build must never be uploaded to the store.
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")

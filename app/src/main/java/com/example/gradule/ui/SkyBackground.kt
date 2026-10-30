@@ -25,8 +25,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import com.example.gradule.data.ThemeMode
-import com.example.gradule.data.WeatherKind
-import com.example.gradule.data.WeatherState
 import kotlinx.coroutines.delay
 import java.time.LocalTime
 import kotlin.math.PI
@@ -54,20 +52,6 @@ internal fun skyColors(hour: Float): Pair<Color, Color> {
     return lerp(a.top, b.top, t) to lerp(a.bottom, b.bottom, t)
 }
 
-/** How strongly each condition greys the sky, and how much it dims the sun/moon glow. */
-private class WeatherLook(val tint: Color, val amount: Float, val glow: Float)
-
-private fun weatherLook(kind: WeatherKind): WeatherLook? = when (kind) {
-    WeatherKind.CLEAR -> null
-    WeatherKind.PARTLY -> WeatherLook(Color(0xFF7D8AA0), 0.12f, 0.8f)
-    WeatherKind.CLOUDY -> WeatherLook(Color(0xFF6B7485), 0.35f, 0.4f)
-    WeatherKind.FOG -> WeatherLook(Color(0xFF9AA2AE), 0.30f, 0.3f)
-    WeatherKind.DRIZZLE -> WeatherLook(Color(0xFF4E5C70), 0.45f, 0.3f)
-    WeatherKind.RAIN -> WeatherLook(Color(0xFF3A4658), 0.55f, 0.2f)
-    WeatherKind.SNOW -> WeatherLook(Color(0xFFB8C4D4), 0.30f, 0.4f)
-    WeatherKind.STORM -> WeatherLook(Color(0xFF232A38), 0.60f, 0.15f)
-}
-
 internal fun currentHour(): Float = LocalTime.now().let { it.hour + it.minute / 60f }
 
 @Composable
@@ -84,12 +68,10 @@ private fun rememberHour(): State<Float> {
 
 /**
  * Full-screen gradient that drifts with the time of day, with a sun/moon glow on an arc.
- * In [ThemeMode.LIVE_SKY] the same gradient is greyed and dimmed by the current weather when it is known.
  */
 @Composable
 fun SkyBackground(
     mode: ThemeMode,
-    weather: WeatherState = WeatherState.NeedsPermission,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -102,16 +84,8 @@ fun SkyBackground(
     val scheme = MaterialTheme.colorScheme
     val useDynamic = mode == ThemeMode.DYNAMIC && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val (timeTop, timeBottom) = skyColors(hour)
-    val look = if (mode == ThemeMode.LIVE_SKY && weather is WeatherState.Ready) {
-        weatherLook(weather.weather.kind)
-    } else {
-        null
-    }
-    val skyTop = look?.let { lerp(timeTop, it.tint, it.amount) } ?: timeTop
-    val skyBottom = look?.let { lerp(timeBottom, it.tint, it.amount) } ?: timeBottom
-    val glowStrength = look?.glow ?: 1f
-    val targetTop = if (useDynamic) scheme.primaryContainer else skyTop
-    val targetBottom = if (useDynamic) scheme.tertiaryContainer else skyBottom
+    val targetTop = if (useDynamic) scheme.primaryContainer else timeTop
+    val targetBottom = if (useDynamic) scheme.tertiaryContainer else timeBottom
 
     val top by animateColorAsState(targetTop, tween(2_000), label = "skyTop")
     val bottom by animateColorAsState(targetBottom, tween(2_000), label = "skyBottom")
@@ -138,7 +112,7 @@ fun SkyBackground(
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            glowColor.copy(alpha = (if (isDay) 0.38f else 0.22f) * breathe * glowStrength),
+                            glowColor.copy(alpha = (if (isDay) 0.38f else 0.22f) * breathe),
                             Color.Transparent,
                         ),
                         center = Offset(x, y),

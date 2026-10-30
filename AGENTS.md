@@ -1,6 +1,6 @@
 # Skydule: context for AI coding agents
 
-Android calendar app (Kotlin, Jetpack Compose, Material 3). Single module `:app`. Store package `com.gregjameshoward.skydule`
+Android calendar app (Kotlin, Jetpack Compose, Material 3). Single module `:app`. Store package `com.kodalabs.skydule`
 (`applicationId`, can't change after the first upload); code namespace still `com.example.gradule`.
 Named "Skydule" (sky + schedule). It was called Gradule and moved off that name and off Gradient Weather's look.
 
@@ -16,7 +16,8 @@ Named "Skydule" (sky + schedule). It was called Gradule and moved off that name 
 ## App structure
 - Three tabs in a floating glass bar (`ui/MainScreen.kt`): **Schedule** (default), **Week**, **Month**.
 - One shared `selectedDate` in `MainViewModel`. Month/Week pagers follow it and update it on swipe; tapping a day in
-  Week or Month sets it and switches to Schedule, which scrolls to that day.
+  Week sets it and switches to Schedule, which scrolls to that day. Month is a plain full-height grid: with the panel away each cell shows up to two titled chips and "+N"; as the panel opens (`reveal` 0 to 1 drives cell height and the swap) they fade into one dot per event. Tapping a day selects it and slides its events down in a panel under the grid (`DayPanel` in `ui/MonthTab.kt`); tapping the same day again closes the panel, another day swaps its contents, and tapping an event opens it. While the panel is open the floating + hides (`monthPanelOpen` in `MainScreen`) and a + in the panel header adds an event on that day.
+- Schedule: days are told apart by the date column with a 22dp gap (no divider lines). A day with nothing on (today, or the selected day) shows `EmptyDayCard`: same shape as an event card, a sun outline instead of the colour bar, "Clear day / Tap to add an event"; tapping it opens the editor on that day. The hero says nothing when today is empty.
 - Events are loaded for a `DateWindow` (`MainViewModel.window`) and bucketed by day (`eventsByDay`). Tabs call
   `ensureCovers` when paging, and Schedule calls `extendForward`/`extendBackward` at its list ends.
 - Settings are a full page (`ui/SettingsScreen.kt`) that slides in from any tab's gear. Values live in
@@ -55,8 +56,8 @@ Named "Skydule" (sky + schedule). It was called Gradule and moved off that name 
   `tools/generate_day_icons.py` pre-makes 366 dates x 4 periods = 1,464 small adaptive vector icons
   (`res/mipmap-anydpi/ic_dyn_<period>_MM_DD.xml`, 366 shared foregrounds, 4 shared backgrounds) and one `activity-alias`
   each (`A<period>M<mm>D<dd>`, plus `DefaultIcon`) between the markers in `AndroidManifest.xml`. Exactly one alias is
-  enabled. `DayIcon.apply` enables the new alias before disabling the old one (`DONT_KILL_APP`); `DayIconReceiver` runs at
-  each period boundary/midnight (inexact alarm, only while Dynamic is chosen) and `MainActivity.onCreate` runs it too.
+  enabled. `DayIcon.apply` enables the new alias before disabling the old one (`DONT_KILL_APP`), but only runs while the app is out of sight (`MainActivity.onStop`; `DayIcon.appVisible` makes the receiver skip it while the app is open), because disabling the alias the app was launched from closes the running app; `DayIconReceiver` runs at
+  each period boundary/midnight (inexact alarm, only while Dynamic is chosen) and `MainActivity.onStop` runs it too.
   The choice is kept in SharedPreferences (`gradule_day_icon`), not DataStore, because the receiver needs it synchronously.
   Re-run the generator after changing the sky palette or design. The main activity has no launcher filter; aliases provide it.
 
@@ -74,9 +75,8 @@ Named "Skydule" (sky + schedule). It was called Gradule and moved off that name 
   later by real weather (Open-Meteo, no API key).
 - Always white text on mid-to-dark gradients. Glass cards: `Glass` (white 13%), 28dp corners.
   Dense grids use the darker `GridGlass` so text stays legible on bright afternoon skies.
-- Big light-weight display type, generous spacing, subtle motion. Theme modes: Sky (default), Dynamic sky, Material You, AMOLED.
-- Dynamic sky (`ThemeMode.LIVE_SKY`): same time-of-day gradient, greyed by the current weather kind
-  (`weatherLook` in `ui/SkyBackground.kt`) and with the glow dimmed. Falls back to plain Sky when weather is unknown.
+- Big light-weight display type, generous spacing, subtle motion. Theme modes: Sky (default), Material You, AMOLED.
+- There is no weather-tinted "Dynamic sky" theme (removed on purpose, with its code). A stored `LIVE_SKY` value from an old build falls back to Sky.
 
 - Repeat rules the presets can't express are kept as `Repeat.CUSTOM` + `NewEvent.customRule` when editing. Reminders of -1 (calendar default) are treated as 10 min.
 - Snoozes are saved in prefs (`gradule_reminders`/`snoozes`) and re-armed by `ReminderScheduler.reschedule`; after boot it also shows reminders missed in the last 6 h. Unit tests: `./gradlew testDebugUnitTest`.

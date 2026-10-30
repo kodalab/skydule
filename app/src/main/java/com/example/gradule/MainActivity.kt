@@ -51,8 +51,8 @@ class MainActivity : ComponentActivity() {
         if (!roomy) {
             requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
-        // Keep the launcher icon's date and sky band current, and plan the next change.
-        DayIcon.apply(this)
+        // Plan the next icon change. The switch itself waits until the app is out of sight (see onStop): changing
+        // the launcher alias the app was started from closes it.
         DayIcon.scheduleNext(this)
         // Our backgrounds are always dark-ish, so keep system bar icons light.
         val transparent = android.graphics.Color.TRANSPARENT
@@ -64,6 +64,19 @@ class MainActivity : ComponentActivity() {
         // Someone tapping a reminder wants the event now, not a branded pause.
         val skipSplash = intent?.hasExtra(EXTRA_EVENT_ID) == true
         setContent { LaunchGate(skipSplash) }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        DayIcon.appVisible = true
+    }
+
+    override fun onStop() {
+        super.onStop()
+        DayIcon.appVisible = false
+        // Now it's safe: bring the launcher icon up to date with the choice, date and time of day.
+        DayIcon.apply(this)
+        DayIcon.scheduleNext(this)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -150,7 +163,7 @@ private fun GraduleApp(vm: MainViewModel = viewModel()) {
     }
 
     GraduleTheme(mode) {
-        SkyBackground(mode, weather) {
+        SkyBackground(mode) {
             if (granted) {
                 MainScreen(vm)
             } else {

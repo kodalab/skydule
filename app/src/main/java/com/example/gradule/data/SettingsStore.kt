@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.map
 
 enum class ThemeMode(val label: String) {
     SKY("Sky (follows the time of day)"),
-    LIVE_SKY("Dynamic sky (time of day and weather)"),
     DYNAMIC("Material You (Android 12+)"),
     AMOLED("AMOLED black"),
 }

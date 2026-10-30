@@ -84,6 +84,7 @@ fun ScheduleTab(
     showWeather: Boolean,
     onWeather: () -> Unit,
     onEvent: EventOpener,
+    onAdd: (LocalDate, androidx.compose.ui.geometry.Rect) -> Unit,
     onToday: () -> Unit,
     onSettings: () -> Unit,
     onNeedForward: () -> Unit,
@@ -201,6 +202,7 @@ fun ScheduleTab(
                         selected = selected,
                         events = byDay[row.date].orEmpty(),
                         onEvent = onEvent,
+                        onAdd = onAdd,
                     )
                 }
             }
@@ -277,12 +279,9 @@ private fun Hero(
                 maxLines = 1,
             )
         }
-        Text(
-            when (count) {
-                0 -> "Nothing planned today"
-                1 -> "1 event today"
-                else -> "$count events today"
-            },
+        // An empty today is said by its own card in the list, so the header stays quiet.
+        if (count > 0) Text(
+            if (count == 1) "1 event today" else "$count events today",
             fontSize = 14.sp,
             color = White.copy(alpha = 0.65f),
             modifier = Modifier.padding(top = 8.dp),
@@ -308,6 +307,7 @@ private fun DayRow(
     selected: LocalDate,
     events: List<CalendarEvent>,
     onEvent: EventOpener,
+    onAdd: (LocalDate, androidx.compose.ui.geometry.Rect) -> Unit,
 ) {
     val isToday = date == today
     val isSelected = date == selected
@@ -336,32 +336,54 @@ private fun DayRow(
             }
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            // Today's empty state is already said by the header ("Nothing planned today").
-            if (events.isEmpty() && !isToday) {
-                Text(
-                    "Nothing planned",
-                    fontSize = 15.sp,
-                    color = White.copy(alpha = 0.55f),
-                    modifier = Modifier.padding(top = 18.dp),
-                )
+            if (events.isEmpty()) {
+                EmptyDayCard(onClick = { bounds -> onAdd(date, bounds) })
             } else {
                 events.forEach { e -> EventCard(e, onClick = { bounds -> onEvent(e, bounds) }) }
             }
         }
     }
-    // Marks where this day ends, so one day's events don't run into the next.
-        DayDivider(Modifier.padding(top = 12.dp))
+    // Days are told apart by the date column; a little air replaces the old divider line.
+        Spacer(Modifier.height(22.dp))
     }
 }
 
-/** A thin rounded line between days. */
+/** Stands in for a day with nothing on: same shape as an event card, a sun outline instead of the colour bar. */
 @Composable
-private fun DayDivider(modifier: Modifier = Modifier) {
-    Box(
-        modifier
+private fun EmptyDayCard(onClick: (androidx.compose.ui.geometry.Rect) -> Unit) {
+    Row(
+        Modifier
             .fillMaxWidth()
-            .height(4.dp)
-            .clip(RoundedCornerShape(50))
-            .background(Color.White.copy(alpha = 0.24f)),
-    )
+            .clip(RoundedCornerShape(28.dp))
+            .background(Glass)
+            .clickableWithBounds(onClick)
+            .padding(horizontal = 18.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // 6dp bar + 16dp gap on event cards = 22dp, so the text lines up with theirs.
+        Box(Modifier.width(22.dp).height(46.dp), contentAlignment = Alignment.CenterStart) {
+            SunOutline(Modifier.size(20.dp))
+        }
+        Column(Modifier.weight(1f)) {
+            Text("Clear day", style = MaterialTheme.typography.titleMedium, color = White.copy(alpha = 0.85f))
+            Text("Tap to add an event", fontSize = 14.sp, color = White.copy(alpha = 0.6f))
+        }
+    }
+}
+
+@Composable
+private fun SunOutline(modifier: Modifier = Modifier) {
+    androidx.compose.foundation.Canvas(modifier) {
+        val c = center
+        val stroke = 1.8.dp.toPx()
+        val col = Color.White.copy(alpha = 0.8f)
+        drawCircle(col, radius = size.minDimension * 0.18f, center = c, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+        val r1 = size.minDimension * 0.29f
+        val r2 = size.minDimension * 0.40f
+        for (k in 0 until 8) {
+            val a = Math.toRadians(k * 45.0)
+            val dx = Math.cos(a).toFloat(); val dy = Math.sin(a).toFloat()
+            drawLine(col, androidx.compose.ui.geometry.Offset(c.x + dx * r1, c.y + dy * r1), androidx.compose.ui.geometry.Offset(c.x + dx * r2, c.y + dy * r2), strokeWidth = stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+        }
+    }
 }

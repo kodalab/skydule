@@ -289,6 +289,8 @@ fun MainScreen(vm: MainViewModel) {
     }
 
     var barPx by remember { mutableIntStateOf(0) }
+    // Month's day panel has its own add button, so the floating one steps aside while the panel is open.
+    var monthPanelOpen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     val barDp = with(density) { barPx.toDp() }
     val paneOpen = (opened != null || editing != null) && !paneClosing
     val fromRight = detailSide == DetailSide.RIGHT
@@ -325,8 +327,8 @@ fun MainScreen(vm: MainViewModel) {
     // The content makes room for the card by padding, so the sky, the blur and the tab bar's fade
     // stay one continuous layer right across the screen, behind the card as well.
     val roomSpec = tween<androidx.compose.ui.unit.Dp>(if (paneOpen) OPEN_MS else CLOSE_MS, easing = if (paneOpen) OpenEasing else CloseEasing)
-    val startPad by androidx.compose.animation.core.animateDpAsState(if (paneOpen && !fromRight) paneWidth + 24.dp else 0.dp, roomSpec, label = "startPad")
-    val endPad by androidx.compose.animation.core.animateDpAsState(if (paneOpen && fromRight) paneWidth + 24.dp else 0.dp, roomSpec, label = "endPad")
+    val startPad by androidx.compose.animation.core.animateDpAsState(if (paneMode == PaneMode.SLIDE && paneOpen && !fromRight) paneWidth + 24.dp else 0.dp, roomSpec, label = "startPad")
+    val endPad by androidx.compose.animation.core.animateDpAsState(if (paneMode == PaneMode.SLIDE && paneOpen && fromRight) paneWidth + 24.dp else 0.dp, roomSpec, label = "endPad")
     CompositionLocalProvider(LocalBarInset provides barDp) {
         Box(Modifier.fillMaxSize()) {
             // Schedule scrolls underneath the floating bar (blurred there); Week and Month stay clear of it.
@@ -342,6 +344,7 @@ fun MainScreen(vm: MainViewModel) {
                             showWeather = showWeather,
                                 onWeather = onWeather,
                             onEvent = { e, r -> openEvent(e, r) },
+                            onAdd = { d, r -> openEditor(r, d, null) },
                             onToday = vm::goToToday,
                             onSettings = { openSettings() },
                             onNeedForward = vm::extendForward,
@@ -364,7 +367,10 @@ fun MainScreen(vm: MainViewModel) {
                             selected = date,
                             firstDow = firstDow,
                             byDay = byDay,
-                            onPickDay = openDayInSchedule,
+                            onEvent = { e, r -> openEvent(e, r) },
+                            panelOpen = monthPanelOpen,
+                            onPanelOpen = { monthPanelOpen = it },
+                            onAdd = { d, r -> openEditor(r, d, null) },
                             onSelectDate = vm::selectDate,
                             onEnsure = vm::ensureCovers,
                             onToday = vm::goToToday,
@@ -379,19 +385,25 @@ fun MainScreen(vm: MainViewModel) {
                     onSelect = { tabIndex = it.ordinal },
                 )
             }
-            // Same icon-only button on every tab.
-            FloatingActionButton(
-                onClick = {
-                    val b = fabBounds
-                    if (b != null) openEditor(b, if (tab == GraduleTab.Schedule) java.time.LocalDate.now() else date, null)
-                },
-                containerColor = White,
-                contentColor = Ink,
+            // The same icon-only button on every tab, except Month with its day panel open (the panel has its own).
+            androidx.compose.animation.AnimatedVisibility(
+                visible = !(tab == GraduleTab.Month && monthPanelOpen),
+                enter = androidx.compose.animation.scaleIn() + androidx.compose.animation.fadeIn(),
+                exit = androidx.compose.animation.scaleOut() + androidx.compose.animation.fadeOut(),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp + endPad, bottom = barDp + 16.dp)
-                    .onGloballyPositioned { fabBounds = it.boundsInRoot() },
-            ) { Icon(Icons.Default.Add, contentDescription = "New event") }
+                    .padding(end = 16.dp + endPad, bottom = barDp + 16.dp),
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        val b = fabBounds
+                        if (b != null) openEditor(b, if (tab == GraduleTab.Schedule) java.time.LocalDate.now() else date, null)
+                    },
+                    containerColor = White,
+                    contentColor = Ink,
+                    modifier = Modifier.onGloballyPositioned { fabBounds = it.boundsInRoot() },
+                ) { Icon(Icons.Default.Add, contentDescription = "New event") }
+            }
             paneSlot()
         }
     }

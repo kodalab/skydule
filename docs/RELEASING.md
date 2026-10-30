@@ -12,7 +12,9 @@
 
 ## Each release
 1. Raise `versionName` in `app/build.gradle.kts` if the user-visible version changes. `versionCode` is set by CI from
-   the run number plus 100, so it always goes up (a manually built first bundle uses 1).
+   the run number plus 100, so it always goes up. A manual build falls back to the default in `app/build.gradle.kts`
+   (currently 21, the last code uploaded by hand): pass `-PversionCode=<higher>` or raise that default. Play never lets a
+   code be reused, even from a discarded draft. Add an entry to `CHANGELOG.md`.
 2. GitHub > Actions > "Release bundle" > Run workflow (or push a tag such as `v1.0.0`).
 3. Download `skydule-release-aab` from the finished run, unzip it, and upload `app-release.aab` in Play Console:
    Testing > Internal testing > Create new release.

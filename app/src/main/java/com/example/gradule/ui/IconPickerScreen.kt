@@ -197,8 +197,8 @@ fun IconPickerScreen(
                 }
             }
             Text(
-                "Your launcher may take a moment to update the icon, and some may briefly refresh the home " +
-                    "screen when it changes. Switch back to Default any time.",
+                "The icon on your home screen changes when you leave Skydule, so the app stays open while you choose. " +
+                    "Your launcher may take a moment to show it. Switch back to Default any time.",
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
                 color = White.copy(alpha = 0.55f),
