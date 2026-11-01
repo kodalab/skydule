@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="10dp">
+
+    <TextView
+        android:id="@+id/range"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:alpha="0.8"
+        android:maxLines="1"
+        android:text="25 – 31 OCT"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
+        android:letterSpacing="0.1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/cell0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <TextView
+                android:id="@+id/dow0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:text="Sun"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/num0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/dot0"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginTop="2dp"
+                android:alpha="0.9"
+                android:src="@drawable/widget_dot" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cell1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <TextView
+                android:id="@+id/dow1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:text="Mon"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/num1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="26"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/dot1"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginTop="2dp"
+                android:alpha="0.9"
+                android:src="@drawable/widget_dot" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cell2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <TextView
+                android:id="@+id/dow2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:text="Tue"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/num2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="27"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/dot2"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginTop="2dp"
+                android:alpha="0.9"
+                android:src="@drawable/widget_dot" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cell3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <TextView
+                android:id="@+id/dow3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:text="Wed"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/num3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="28"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/dot3"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginTop="2dp"
+                android:alpha="0.9"
+                android:src="@drawable/widget_dot" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cell4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <TextView
+                android:id="@+id/dow4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:text="Thu"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/num4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="29"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/dot4"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginTop="2dp"
+                android:alpha="0.9"
+                android:src="@drawable/widget_dot" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cell5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <TextView
+                android:id="@+id/dow5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:text="Fri"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/num5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/dot5"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginTop="2dp"
+                android:alpha="0.9"
+                android:src="@drawable/widget_dot" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cell6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <TextView
+                android:id="@+id/dow6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:text="Sat"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/num6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="31"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/dot6"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginTop="2dp"
+                android:alpha="0.9"
+                android:src="@drawable/widget_dot" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/widget_card"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:text="Next · 13:30 Jones – Swimming"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/next2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/widget_card"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:text="Tomorrow Mortgage &amp; council tax"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/next3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/widget_card"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:text="Tomorrow Mortgage &amp; council tax"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/next4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/widget_card"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:text="Tomorrow Mortgage &amp; council tax"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/next5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/widget_card"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:text="Tomorrow Mortgage &amp; council tax"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:visibility="gone" />
+</LinearLayout>

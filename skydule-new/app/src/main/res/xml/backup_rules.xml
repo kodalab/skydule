@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and older. Settings (DataStore) are restored; alarm and icon bookkeeping must not be. Calendar choices inside settings are stored by stable calendar key, so they are safe to restore onto another phone. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="gradule_reminders.xml" />
+    <exclude domain="sharedpref" path="gradule_day_icon.xml" />
+</full-backup-content>
