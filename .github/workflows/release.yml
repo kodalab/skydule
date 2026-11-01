@@ -13,6 +13,8 @@ permissions:
 jobs:
   bundle:
     runs-on: ubuntu-latest
+    # The signing and API-key secrets live in the "playstore" environment (Settings > Environments), not as plain repository secrets.
+    environment: playstore
     steps:
       - uses: actions/checkout@v4
 
