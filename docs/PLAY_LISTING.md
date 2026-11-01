@@ -47,7 +47,7 @@ SMALL THINGS DONE WELL
 PRIVATE BY DESIGN
 • No account, no ads, no analytics, no tracking
 • Your events never leave your phone through Skydule
-• Weather and place suggestions are the only things sent online, and only when you use them
+• Weather, place suggestions and optional anonymous crash reports are the only things sent online
 
 Skydule needs access to your calendar to work, and notification permission for reminders. Location is optional and only used for weather.
 

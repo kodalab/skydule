@@ -24,9 +24,9 @@ The app makes no network requests for your calendar data. There is no Google Cal
 
 | Path | Contents |
 | --- | --- |
-| `app/src/main/java/com/example/gradule/` | App source (the package name predates the Skydule name) |
-| `app/src/main/java/com/example/gradule/ui/` | Compose screens and components |
-| `app/src/main/java/com/example/gradule/data/` | Calendar access and settings storage |
+| `app/src/main/java/com/kodalabs/skydule/` | App source (the package name predates the Skydule name) |
+| `app/src/main/java/com/kodalabs/skydule/ui/` | Compose screens and components |
+| `app/src/main/java/com/kodalabs/skydule/data/` | Calendar access and settings storage |
 | `tools/` | Scripts that generate the launcher icons |
 | `docs/` | Privacy policy, Play Store listing, data safety answers, release guide |
 | `store/` | Play Store graphics |

@@ -4,9 +4,10 @@
 
 | Data type | Collected? | Shared? | Purpose | Notes |
 |---|---|---|---|---|
-| Approximate location | Yes (optional) | No | App functionality (weather) | Sent to Open-Meteo, not stored. Treat as "collected, processed ephemerally". |
+| Approximate location | Yes (optional) | No | App functionality (weather, nearby place suggestions) | Sent to Open-Meteo, and to Google Places when suggesting places; not stored by us. Treat as "collected, processed ephemerally". |
 | Calendar events | Processed on-device only | No | App functionality | Never leaves the device, so not "collected" per Play's definition. |
-| Other user-generated content (location text typed into events) | Yes (optional) | No | App functionality (place suggestions) | Sent to the Photon geocoder; ephemeral. |
+| Other user-generated content (location text typed into events) | Yes (optional) | No | App functionality (place suggestions) | Sent to Google Places (fallback: Photon geocoder); ephemeral. |
+| Crash logs, diagnostics, device or other IDs (Firebase installation ID) | Yes (optional, user can switch off in Settings > About) | No (Google Firebase acts as our service provider) | App functionality / analytics (crash diagnosis) | Sent to Firebase Crashlytics, no calendar content. Confirm against Firebase's own Play data disclosure page when filling the form. |
 
 - Data encrypted in transit: **Yes** (HTTPS).
 - Users can request deletion: no data is held by us; uninstalling removes local data.

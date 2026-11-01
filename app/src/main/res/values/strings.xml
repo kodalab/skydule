@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Skydule</string>
+    <string name="widget_next_name">Next up</string>
+    <string name="widget_next_desc">Your next event at a glance.</string>
+    <string name="widget_agenda_name">Today’s agenda</string>
+    <string name="widget_agenda_desc">Today’s date and events.</string>
+    <string name="widget_week_name">Week strip</string>
+    <string name="widget_week_desc">This week, with a dot on busy days. Tap a day to open it.</string>
 </resources>

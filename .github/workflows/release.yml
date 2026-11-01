@@ -43,12 +43,26 @@ jobs:
             echo "keyPassword=$UPLOAD_KEY_PASSWORD"
           } > keystore.properties
 
+      # Optional: crash reporting config, written from a secret so it never lives in the repo.
+      - name: Restore Firebase config
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > app/google-services.json
+          else
+            echo "No GOOGLE_SERVICES_JSON_BASE64 secret: building without crash reporting."
+          fi
+
       - name: Test and build signed bundle
+        env:
+          # Optional: Google Places key for location suggestions (empty = OpenStreetMap only).
+          PLACES_API_KEY: ${{ secrets.PLACES_API_KEY }}
         run: ./gradlew testDebugUnitTest bundleRelease -PversionCode=$(( ${{ github.run_number }} + 100 )) --stacktrace
 
       - name: Remove signing files
         if: always()
-        run: rm -f keystore.properties "$RUNNER_TEMP/upload.jks"
+        run: rm -f keystore.properties app/google-services.json "$RUNNER_TEMP/upload.jks"
 
       # Downloadable from the run page by people who can see the repo. It is signed with the upload key only,
       # which Google re-signs, so it isn't useful to anyone else.

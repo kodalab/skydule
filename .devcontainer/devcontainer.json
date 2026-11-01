@@ -1,5 +1,5 @@
 {
-  "name": "Gradule (Android / Kotlin)",
+  "name": "Skydule (Android / Kotlin)",
   "image": "mcr.microsoft.com/devcontainers/java:1-17-bookworm",
   "containerEnv": {
     "ANDROID_HOME": "/home/vscode/android-sdk",

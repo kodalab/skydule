@@ -23,3 +23,14 @@
 ## Checks
 - Never upload a build made without the upload key: locally, a missing `keystore.properties` falls back to the debug key.
 - Keep `keystore.properties`, `*.jks` and `*.keystore` out of git (they are ignored).
+
+## Google Places key (location suggestions)
+- The key is never committed. For store builds, add it in GitHub > Settings > Secrets and variables > Actions as `PLACES_API_KEY`; `release.yml` passes it to the build. For a local build, put `PLACES_API_KEY=...` in a `.env` file in the project root (git-ignored; template in `.env.example`).
+- `build.yml` (the public rolling debug APK) deliberately has no key, so that build uses OpenStreetMap suggestions only.
+- The key is still compiled into the app, so keep it restricted in Google Cloud: Places API (New) only, package `com.kodalabs.skydule` plus the Play app-signing SHA-1, a daily quota and a budget alert.
+
+## Crash reporting (Firebase Crashlytics)
+- In the Firebase console create a project, add an Android app with package `com.kodalabs.skydule`, download `google-services.json`, and open the Crashlytics page once to enable it.
+- Store it as the GitHub secret `GOOGLE_SERVICES_JSON_BASE64` (`base64 -w0 google-services.json`). `release.yml` writes it to `app/google-services.json` for the build and deletes it afterwards. For a local build put the file at `app/google-services.json` (git-ignored).
+- Without the secret the release still builds, just without crash reporting. Never commit the file.
+

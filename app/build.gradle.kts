@@ -6,8 +6,16 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// Crash reporting (Firebase Crashlytics) is only wired in when app/google-services.json is present. That file is
+// git-ignored; CI writes it from the GOOGLE_SERVICES_JSON_BASE64 secret (see release.yml). Without it the app builds
+// and runs as before, with no crash reporting.
+if (file("google-services.json").exists()) {
+    pluginManager.apply("com.google.gms.google-services")
+    pluginManager.apply("com.google.firebase.crashlytics")
+}
+
 android {
-    namespace = "com.example.gradule"
+    namespace = "com.kodalabs.skydule"
     compileSdk = 36
     buildToolsVersion = "36.0.0"
 
@@ -18,8 +26,19 @@ android {
         targetSdk = 36
         // CI passes -PversionCode=<run number + 100> so every uploaded bundle is higher than the last (Play requires it).
         // The fallback is the code of the last bundle uploaded to Play by hand (see CHANGELOG.md); raise it with each upload.
-        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 21
+        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 53
         versionName = "1.0.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Google Places key for location suggestions. Never in the repo: it comes from the PLACES_API_KEY environment
+        // variable (the GitHub Actions secret of the same name, see release.yml) or from a git-ignored .env file
+        // (PLACES_API_KEY=...) in the project root. Empty means no key: suggestions then use OpenStreetMap only.
+        val envFile = rootProject.file(".env")
+        val fromFile = if (envFile.exists()) {
+            envFile.readLines().map { it.trim() }.firstOrNull { it.startsWith("PLACES_API_KEY=") }
+                ?.substringAfter("=")?.trim()?.trim('"', '\'')
+        } else null
+        val placesKey = (System.getenv("PLACES_API_KEY")?.takeIf { it.isNotBlank() } ?: fromFile ?: "").trim()
+        buildConfigField("String", "PLACES_API_KEY", "\"$placesKey\"")
     }
 
     // A fixed debug keystore is committed so every CI build has the same signature
@@ -89,6 +108,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.play.services.location)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -100,4 +121,12 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation("junit:junit:4.13.2")
+
+    // On-emulator UI tests (src/androidTest): ./gradlew connectedDebugAndroidTest, or the "UI tests" workflow.
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

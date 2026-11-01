@@ -30,7 +30,7 @@
   <section>
     <h2>Your data stays on your phone</h2>
     <p>Your calendar events, settings and reminders are stored only on your device. Skydule reads and writes the
-    calendars already on your phone. There are no accounts, no ads and no analytics, and we don't run any servers.</p>
+    calendars already on your phone. There are no accounts, no ads, no analytics and no tracking, and we don't run any servers.</p>
   </section>
 
   <section>
@@ -38,8 +38,12 @@
     <ul>
       <li><strong>Weather:</strong> your approximate location is sent to a weather service (Open-Meteo) to get the
       forecast. It isn't stored.</li>
-      <li><strong>Place suggestions:</strong> text you type in an event's Location field is sent to a place-search
-      service to suggest places.</li>
+      <li><strong>Place suggestions:</strong> text you type in an event's Location field, and your approximate location
+      if you allowed it (to rank nearby places first), are sent to Google Places, or to OpenStreetMap's Photon service
+      if Google can't be used, to suggest places. Nothing is stored by Skydule.</li>
+      <li><strong>Crash reports (optional, on by default; switch off in Settings &gt; About):</strong> if Skydule crashes
+      or hits an error, anonymous technical details go to Google's Firebase Crashlytics so we can fix it: the error, app
+      version, phone model, Android version and a random installation ID. We don't add your events, calendars or places.</li>
     </ul>
   </section>
 
@@ -47,9 +51,9 @@
     <h2>Permissions</h2>
     <ul>
       <li><strong>Calendar:</strong> to show, create, edit and delete your events.</li>
-      <li><strong>Approximate location (optional):</strong> for local weather.</li>
+      <li><strong>Approximate location (optional):</strong> for local weather and nearby place suggestions.</li>
       <li><strong>Notifications and alarms:</strong> to show reminders on time.</li>
-      <li><strong>Internet:</strong> for the weather and place suggestions above.</li>
+      <li><strong>Internet:</strong> for the weather, place suggestions and crash reports above.</li>
     </ul>
   </section>
 

@@ -15,3 +15,15 @@ keystore.properties
 *.jks
 *.keystore
 !app/debug.keystore
+
+# API keys (Google Places). Real values live in GitHub secrets or a local .env, never in the repo.
+.env
+.env.*
+!.env.example
+
+# Firebase config (written by CI from a secret)
+app/google-services.json
+skydule.zip
+skydule-new/
+*.zip
+__pycache__/

@@ -23,7 +23,7 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-SKY_KT = ROOT / "app/src/main/java/com/example/gradule/ui/SkyBackground.kt"
+SKY_KT = ROOT / "app/src/main/java/com/kodalabs/skydule/ui/SkyBackground.kt"
 RES = ROOT / "app/src/main/res"
 MANIFEST = ROOT / "app/src/main/AndroidManifest.xml"
 FONT = ROOT / "tools/fonts/IBMPlexSerif-Bold.ttf"

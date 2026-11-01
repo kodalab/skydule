@@ -4,4 +4,14 @@
     <queries>
         <package android:name="com.subtlesignals.gradientweather" />
     </queries>
+
+    <application>
+        <!-- Debug builds only: shows a crash's stack trace on screen (see CrashReportActivity). -->
+        <activity
+            android:name="com.kodalabs.skydule.debug.CrashReportActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:process=":crash"
+            android:theme="@android:style/Theme.DeviceDefault.Light" />
+    </application>
 </manifest>
